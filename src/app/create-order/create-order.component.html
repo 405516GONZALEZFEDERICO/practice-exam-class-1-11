@@ -1,0 +1,163 @@
+<div class="container mt-4">
+    <!-- Título del formulario -->
+    <h2 class="mb-4">Create New Order</h2>
+
+    <!-- Formulario principal -->
+    <form [formGroup]="orderForm" (ngSubmit)="onSubmit()">
+        <!-- Sección de datos del cliente -->
+        <div class="row mb-4">
+            <!-- Campo Nombre -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nombre:</label>
+                <input type="text" class="form-control" formControlName="customerName"
+                    [ngClass]="{'is-invalid': orderForm.get('customerName')?.invalid && orderForm.get('customerName')?.touched}">
+                <div class="invalid-feedback">
+                    @if (orderForm.get('customerName')?.errors?.['required']) {
+                        <span>Nombre es requerido</span>
+                    }
+                    @if (orderForm.get('customerName')?.errors?.['minlength']) {
+                        <span>Nombre debe tener al menos 3 caracteres</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Campo Email -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" formControlName="email"
+                    [ngClass]="{'is-invalid': orderForm.get('email')?.invalid && orderForm.get('email')?.touched}">
+                <div class="invalid-feedback">
+                    @if (orderForm.get('email')?.errors?.['required']) {
+                        <span>Email es requerido.</span>
+                    }
+                    @if (orderForm.get('email')?.errors?.['email']) {
+                        <span>Formato de email incorrecto.</span>
+                    }
+                    @if (orderForm.get('email')?.errors?.['errorPedido']) {
+                        <span class="text-danger">Has excedido el límite de 3 pedidos en las últimas 24 horas</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de productos -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Productos</h5>
+                    <button type="button" class="btn btn-primary" (click)="addProduct()">
+                        +
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <!-- Lista de productos -->
+                <div formArrayName="products">
+                    @for (product of productsArray.controls; track product; let i = $index) {
+                        <div [formGroupName]="i" class="row mb-3">
+                            <!-- Selector de producto -->
+                            <div class="col-md-3">
+                                <label class="form-label">Producto</label>
+                                <select class="form-select" formControlName="productId">
+                                    <option value="">Select Product</option>
+                                    @for (p of products; track p.id) {
+                                        <option [value]="p.id">{{p.name}}</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- Campo cantidad -->
+                            <div class="col-md-2">
+                                <label class="form-label">Cantidad</label>
+                                <input type="number" class="form-control" formControlName="quantity">
+                                @if (product.get('quantity')?.getError('max')) {
+                                    <div class="text-danger">La cantidad no puede superar el stock.</div>
+                                }
+                                @if (product.get('quantity')?.getError('min')) {
+                                    <div class="text-danger">La cantidad debe ser mayor a 1.</div>
+                                }
+                                @if (product.get('quantity')?.getError('required')) {
+                                    <div class="text-danger">La cantidad es requerida.</div>
+                                }
+                            </div>
+
+                            <!-- Campo precio (readonly) -->
+                            <div class="col-md-2">
+                                <label class="form-label">Precio</label>
+                                <input type="number" class="form-control" formControlName="price" readonly>
+                            </div>
+
+                            <!-- Campo stock (readonly) -->
+                            <div class="col-md-2">
+                                <label class="form-label">Stock</label>
+                                <input type="number" class="form-control" formControlName="stock" readonly>
+                            </div>
+
+                            <!-- Botón eliminar -->
+                            <div class="col-md-1 d-flex align-items-end">
+                                <button type="button" class="btn btn-danger" (click)="removeProduct(i)">
+                                    X
+                                </button>
+                            </div>
+                        </div>
+                    }
+                    @if (orderForm.hasError('minProd', 'products') && orderForm.controls['products'].touched) {
+                        <div class="text-danger">
+                            Debe seleccionar entre un producto hasta 10 productos como maximo.
+                        </div>
+                    }
+                    @if (orderForm.hasError('duplicateProduct', 'products')) {
+                        <div class="text-danger">
+                            El producto ya ha sido seleccionado.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de productos seleccionados -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Productos Seleccionados</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    @for (product of selectedProducts; track product) {
+                        <li>
+                            {{product.name}} - Cantidad: {{product.quantity}} - Precio: {{product.price}} - Stock:
+                            {{product.stock}}
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <!-- Sección de total -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 offset-md-6">
+                        <div class="d-flex justify-content-between">
+                            <strong>Total:</strong>
+                            <span>{{ total | currency:'ARS':'symbol':'1.2-2' }}</span>
+                        </div>
+                        @if (hasDiscount) {
+                            <div class="text-success mt-2">
+                                10% descuento aplicado!
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <!-- Botones de acción -->
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">
+               Crear orden
+            </button>
+        </div>
+    </form>
+</div>
