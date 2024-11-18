@@ -40,7 +40,7 @@ export class ListOrderComponent {
 
   filterOrders() {
     if (!this.searchTerm.value) {
-       this.loadOrders();
+      this.loadOrders();
     }
 
     return this.orders.filter(order =>

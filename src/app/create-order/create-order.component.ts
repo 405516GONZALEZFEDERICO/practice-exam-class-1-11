@@ -1,5 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormArray, ReactiveFormsModule, ValidationErrors, AbstractControl, AsyncValidatorFn, FormControl } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, Validators, FormArray, ReactiveFormsModule, ValidationErrors, AbstractControl, AsyncValidatorFn, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../api.service';
 import { Product } from '../product';
@@ -48,7 +48,7 @@ export class CreateOrderComponent implements OnInit {
 
 
   // Validador asíncrono para el límite de pedidos por email
-   emailOrderLimitValidator(): AsyncValidatorFn {
+  emailOrderLimitValidator(): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       if (!control.value) {
         return of(null);
